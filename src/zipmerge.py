@@ -102,7 +102,8 @@ class ZipFileConsolidator(object):
             os.remove(parent.actual_path)
         zipper = self.import_manager.get_zip_file(parent.actual_path, "w")
         for f in kids:
-            zipper.write(filename=f.actual_path, arcname=parent.actual_path, compress_type=None)
+            _, fname = os.path.split(f.actual_path)
+            zipper.write(filename=f.actual_path, arcname=fname, compress_type=None)
             f.has_parent = True
         return parent
 
