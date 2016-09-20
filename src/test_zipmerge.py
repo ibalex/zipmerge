@@ -1,34 +1,60 @@
+from src.zipmerge import ZipMerge, ZipMergeFile
+from mock import Mock, call
 import unittest
-from src import zipmerge
-from unittest.mock import Mock
-from src.zipmerge import ZipMerge, ZipFileConsolidator, PDFConsolidator,\
-    ZipMergeFile
 
 
-class Test(unittest.TestCase):
-
-
+class TestZipMerge(unittest.TestCase):
+    
     def setUp(self):
-        self.zip_file_class = Mock()
-        self.temp_file_class = Mock()
-        self.pdf_file_merger_class = Mock()
-        self.pdf_file_reader_class = Mock()
-        self.pdf_consolidator = PDFConsolidator(self.pdf_file_merger_class, self.pdf_file_reader_class)
-        self.zip_file_consolidator = ZipFileConsolidator(self.zip_file_class, self.temp_file_class)
-        self.zipmerge = ZipMerge(self.pdf_consolidator, self.zip_file_consolidator)
-
-    def test_simple_pdf_merge(self):
-        files = [ZipMergeFile('\\fake\\file\\path1\\merged.pdf', 'merged.pdf/a.pdf', is_parent=True),
+        self.zipmerge = ZipMerge()
+        self.pdf_file_merger_mock = Mock()
+        self.pdf_file_reader_mock = Mock()
+        self.zip_file_mock = Mock()
+        self.temp_file_mock = Mock()
+        self.import_mgr_mock = Mock()
+        self.import_mgr_mock.get_pdf_file_merger.return_value = self.pdf_file_merger_mock 
+        self.import_mgr_mock.get_pdf_file_reader.return_value = self.pdf_file_reader_mock
+        self.import_mgr_mock.get_zip_file.return_value = self.zip_file_mock
+        self.import_mgr_mock.get_temporary_file.return_value = self.temp_file_mock
+        self.zipmerge = ZipMerge(self.import_mgr_mock)
+        
+    
+    def test_simple_pdf_merge(self):       
+        # This use case merges 3 pdf's into a single new pdf that didn't exist before (it also leaves the seprate pdf's untouched)
+        files = [ZipMergeFile('\\fake\\file\\path1\\merged.pdf', 'merged.pdf', is_parent=True),
                  ZipMergeFile('\\fake\\file\\path1\\a.pdf', 'merged.pdf/a.pdf', is_parent=False),
                  ZipMergeFile('\\fake\\file\\path2\\b.pdf', 'merged.pdf/b.pdf', is_parent=False),
                  ZipMergeFile('\\fake\\file\\path2\\c.pdf', 'merged.pdf/c.pdf', is_parent=False)]
+        results = self.zipmerge.run(files)
+        actual = results[0]
         expected = files[0]
-        actual = self.zipmerge.run(files)
-        self.assertEquals(actual, expected)
+        self.assertEqual=(actual, expected)
+        
+        # Below I verify the behavior and usage of the PdfFileMerger & PdfFileReader API's
+        # Typically I avoid testing my implementation but we can't test the real API's so this is a consolation 
+        self.assertEquals(self.pdf_file_merger_mock.append.call_count, len([f for f in files if not f.is_parent]))
+        new_file = files[0].actual_path
+        self.pdf_file_merger_mock.write.assert_called_once_with(new_file)
 
-#     def test_simple_zip_merge(self):
-#         assert(False)
-#     
+
+    def test_simple_zip_merge(self):
+        files = [ZipMergeFile('\\fake\\file\\path1\\merged.zip', 'merged.zip', is_parent=True),
+        ZipMergeFile('\\fake\\file\\path1\\a.zip', 'merged.zip/a.zip', is_parent=False),
+        ZipMergeFile('\\fake\\file\\path2\\b.zip', 'merged.zip/b.zip', is_parent=False),
+        ZipMergeFile('\\fake\\file\\path2\\c.zip', 'merged.zip/c.zip', is_parent=False)]
+        results = self.zipmerge.run(files)
+        actual = results[0]
+        expected = files[0]
+        self.assertEqual=(actual, expected)
+
+        # Reluctantly testing behavior again
+        self.assertEquals(self.zip_file_mock.write.call_count, len([f for f in files if not f.is_parent]))
+        calls = [call(arcname=files[0].actual_path, compress_type=None, filename=files[1].actual_path),
+                 call(arcname=files[0].actual_path, compress_type=None, filename=files[2].actual_path),
+                 call(arcname=files[0].actual_path, compress_type=None, filename=files[3].actual_path)]
+        self.zip_file_mock.write.assert_has_calls(calls)
+        
+     
 #     def test_simple_pdf_and_zip_merge(self):
 #         assert(False)
 #         
@@ -51,6 +77,7 @@ class Test(unittest.TestCase):
 #         
 #     def test_zip_merge_with_nothing(self):
 #         assert(False)
+        
         
             
 if __name__ == "__main__":
