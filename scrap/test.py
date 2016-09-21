@@ -2,53 +2,53 @@ from src.zipmerge import ZipMerge, ZipMergeFile
 import os
 
 
-
-
-def scenario_1__simple_zip():
+def scenario_1__simple_zip_with_subdirs():
     zm = ZipMerge()
-    output_fpath = './test_pdfs/zipped.zip'
-    files = [ZipMergeFile(output_fpath, "zipped.zip", is_parent=True),
-             ZipMergeFile("./test_pdfs/a.pdf", "zipped.zip/a.pdf", is_parent=False),
-             ZipMergeFile("./test_pdfs/b.pdf", "zipped.zip/b.pdf", is_parent=False),
-             ZipMergeFile("./test_pdfs/c.pdf", "zipped.zip/c.pdf", is_parent=False)]
+    root_dir = './test_pdfs/'
+    dest_path = "./test_pdfs/scenario_1.zip"
+    files = [ZipMergeFile("./test_pdfs/a.pdf", dest_path),
+             ZipMergeFile("./test_pdfs/b.pdf", dest_path),
+             ZipMergeFile("./test_pdfs/c.pdf", dest_path),
+             ZipMergeFile("./test_pdfs/d", dest_path)]
     _ = zm.run(files)
-    result = os.path.exists(output_fpath) == True
+    result = os.path.exists(dest_path) == True
     print("\r\n\t\tWORKED!" if result else "\r\n\t\tFAILED!")
+    
     
 def scenario_2__simple_merge():
     zm = ZipMerge()
-    output_fpath = './test_pdfs/merged.pdf'
-    files = [ZipMergeFile(output_fpath, "merged.pdf", is_parent=True),
-             ZipMergeFile("./test_pdfs/a.pdf", "merged.pdf/a.pdf", is_parent=False),
-             ZipMergeFile("./test_pdfs/b.pdf", "merged.pdf/b.pdf", is_parent=False),
-             ZipMergeFile("./test_pdfs/c.pdf", "merged.pdf/c.pdf", is_parent=False)]
+    root_dir = './test_pdfs/'
+    dest_path = "./test_pdfs/scenario_2.pdf"
+    files = [ZipMergeFile("./test_pdfs/a.pdf", dest_path),
+             ZipMergeFile("./test_pdfs/b.pdf", dest_path),
+             ZipMergeFile("./test_pdfs/c.pdf", dest_path)]
     _ = zm.run(files)
-    result = os.path.exists(output_fpath) == True
+    result = os.path.exists(dest_path) == True
     print("\r\n\t\tWORKED!" if result else "\r\n\t\tFAILED!")    
 
 
-def scenario_3__pdf_merge_and_zip_multilevel():
+def scenario_3__pdf_merge_then_zip_with_subdirs():
     zm = ZipMerge()
-    output_fpath = './test_pdfs/scenario_3.zip'
-    files = [ZipMergeFile(output_fpath, "scenario_3.zip", is_parent=True),
-             
-             ZipMergeFile('',                  "scenario_3.zip/sub_1.zip", is_parent=True),
-             ZipMergeFile('./test_pdfs/a.pdf', "scenario_3.zip/sub_1.zip/a.pdf"),
-             ZipMergeFile('./test_pdfs/b.pdf', "scenario_3.zip/sub_1.zip/b.pdf"),
-             
-             ZipMergeFile('',                  "scenario_3.zip/sub_2.zip", is_parent=True),             
-             ZipMergeFile('./test_pdfs/b.pdf', "scenario_3.zip/sub_2.zip/b.pdf"),
-             ZipMergeFile('./test_pdfs/c.pdf', "scenario_3.zip/sub_2.zip/c.pdf"),
-             
-             ZipMergeFile('',                  "scenario_3.zip/sub_2.zip/c.pdf/merged_b_and_c.pdf", is_parent=True),
-             ZipMergeFile('./test_pdfs/b.pdf', "scenario_3.zip/sub_2.zip/c.pdf/merged_b_and_c.pdf/b.pdf"),
-             ZipMergeFile('./test_pdfs/c.pdf', "scenario_3.zip/sub_2.zip/c.pdf/merged_b_and_c.pdf/c.pdf")]
-    
+    root_dir = './test_pdfs/'
+    dest_path1 = "./test_pdfs/scenario_3.pdf"
+    dest_path2 = "./test_pdfs/scenario_3.zip"
+    files = [ZipMergeFile("./test_pdfs/a.pdf", dest_path1),
+             ZipMergeFile("./test_pdfs/b.pdf", dest_path1),
+             ZipMergeFile("./test_pdfs/c.pdf", dest_path1),
+             ZipMergeFile(dest_path1, dest_path2),
+             ZipMergeFile("./test_pdfs/a.pdf", dest_path2),
+             ZipMergeFile("./test_pdfs/b.pdf", dest_path2),
+             ZipMergeFile("./test_pdfs/c.pdf", dest_path2),
+             ZipMergeFile("./test_pdfs/d", dest_path2)]
     _ = zm.run(files)
-    result = os.path.exists(output_fpath) == True
+    result = os.path.exists(dest_path1) == True and os.path.exists(dest_path2) == True 
     print("\r\n\t\tWORKED!" if result else "\r\n\t\tFAILED!")   
 
-    
-# scenario_1__simple_zip()
-# scenario_2__simple_merge()
-scenario_3__pdf_merge_and_zip_multilevel()
+
+
+if __name__ == '__main__':
+    scenario_1__simple_zip_with_subdirs()
+    scenario_2__simple_merge()
+    scenario_3__pdf_merge_then_zip_with_subdirs()
+
+
