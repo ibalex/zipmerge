@@ -1,5 +1,7 @@
 import os
+
 class ZipMergeFileAccessException(Exception): pass
+
 class DependencyManager(object):
     ''' This class is not really needed but made it convenient for 
         mocking in the unit test... by indirectly using dependencies 
@@ -15,7 +17,7 @@ class DependencyManager(object):
     
     def get_pdf_file_reader(self, fpath):
         from PyPDF2.pdf import PdfFileReader
-        return PdfFileReader(file(fpath, 'rb'))
+        return PdfFileReader(open(fpath, 'rb'))
     
     def get_zip_file(self, fpath, mode):
         if os.path.exists(fpath):
@@ -52,7 +54,7 @@ class ZipMergeFile(object):
     
     @property
     def name(self):
-        _, fname = os.path.split(self.source_path)
+        _, fname = os.path.split(self.source_path.replace('\\', '/'))
         return fname
         
                 
@@ -63,7 +65,12 @@ class ZipMerge(object):
         self.dependency_manager = dependency_manager or DependencyManager()
         self.consolidators = {'.pdf': PDFConsolidator, '.zip': ZipConsolidator}
     
-    def run(self, zip_merge_files):
+    def run(self, file_mappings):
+        '''
+        :param file_mappings: list of tuples like ('/file/path/fname.txt', 'archive/path/fname.txt')
+        :return: A list of file paths for the new files
+        '''
+        zip_merge_files = [ZipMergeFile(t[0], t[1]) for t in file_mappings]
         self._verify_source_files(zip_merge_files)
         pdfs = [f for f in zip_merge_files if f.dest_ext == '.pdf']
         zips = [f for f in zip_merge_files if f.dest_ext == '.zip']

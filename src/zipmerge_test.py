@@ -1,5 +1,5 @@
-from src.zipmerge import ZipMerge, ZipMergeFile, ZipMergeFileAccessException, DependencyManager
-from mock import Mock, call, patch
+from src.zipmerge import ZipMerge, ZipMergeFileAccessException
+from mock import Mock, call
 import unittest
 
 
@@ -23,9 +23,9 @@ class TestZipMerge(unittest.TestCase):
     def test_simple_pdf_merge(self):       
         # This use case merges 3 pdf's into a single new pdf that didn't exist before (it also leaves the seprate pdf's untouched)
         dest_path = "\\fake\\file\\path1\\merged.pdf"
-        files = [ZipMergeFile('\\fake\\file\\path1\\a.pdf', dest_path),
-                 ZipMergeFile('\\fake\\file\\path2\\b.pdf', dest_path),
-                 ZipMergeFile('\\fake\\file\\path2\\c.pdf', dest_path)]
+        files = [('\\fake\\file\\path1\\a.pdf', dest_path),
+                 ('\\fake\\file\\path2\\b.pdf', dest_path),
+                 ('\\fake\\file\\path2\\c.pdf', dest_path)]
         actual = self.zipmerge.run(files)
         expected = [dest_path]
         self.assertEqual=(actual, expected)
@@ -37,19 +37,20 @@ class TestZipMerge(unittest.TestCase):
 
 
     def test_simple_zip_merge(self):
+        src = '\\fake\\file\\path\\'
+        fa, fb, fc = 'a.zip', 'b.zip', 'c.zip'
+        s1, s2, s3 = src+fa, src+fb, src+fc
         dest_path = "\\fake\\file\\path99\\merged.zip"
-        files = [ZipMergeFile('\\fake\\file\\path1\\a.zip', dest_path),
-                 ZipMergeFile('\\fake\\file\\path2\\b.zip', dest_path),
-                 ZipMergeFile('\\fake\\file\\path2\\c.zip', dest_path)]
+        files = [(s1, dest_path), (s2, dest_path), (s3, dest_path)]
         actual = self.zipmerge.run(files)
         expected = [dest_path]
         self.assertEqual=(actual, expected)
 
         # Reluctantly testing behavior again
         self.assertEquals(self.zip_file_mock.write.call_count, len(files))
-        calls = [call(arcname=files[0].name, compress_type=None, filename=files[0].source_path),
-                 call(arcname=files[1].name, compress_type=None, filename=files[1].source_path),
-                 call(arcname=files[2].name, compress_type=None, filename=files[2].source_path)]
+        calls = [call(arcname=fa, compress_type=None, filename=s1),
+                 call(arcname=fb, compress_type=None, filename=s2),
+                 call(arcname=fc, compress_type=None, filename=s3)]
         self.zip_file_mock.write.assert_has_calls(calls)
         
      
@@ -64,8 +65,8 @@ class TestZipMerge(unittest.TestCase):
     def test_exception_when_missing_source_file(self):
         self.dependency_mgr_mock.os_path_exists.return_value = False
         dest_path = "\\fake\\file\\path1\\merged.pdf"
-        files = [ZipMergeFile('\\fake\\file\\path1\\a.pdf', dest_path),
-                 ZipMergeFile('\\fake\\file\\path2\\b.pdf', dest_path)]
+        files = [('\\fake\\file\\path1\\a.pdf', dest_path),
+                 ('\\fake\\file\\path2\\b.pdf', dest_path)]
         self.assertRaises(ZipMergeFileAccessException, self.zipmerge.run, files)
     
 #     @patch('src.zipmerge.os.path')
