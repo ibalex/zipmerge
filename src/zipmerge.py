@@ -129,27 +129,27 @@ class ZipConsolidator(IFileConsolidator):
             self.dependency_manager.upsert_parent_directory(dest_path)
             zipper = self.dependency_manager.get_zip_file(dest_path, "a")
             files = sorted(files, key=lambda f: len(f.dest_path))
-            for o in [o for o in files if os.path.isdir(o.source_path)]:
-                self._zip_dir(zipper, o)
-            for o in [o for o in files if not os.path.isdir(o.source_path)]:
-                self._zip_file(zipper, o)
+            self._zip_dirs(zipper, files)
+            self._zip_files(zipper, files)
             zipper.close()
             new_files.append(dest_path)
         return new_files
     
-    def _zip_file(self, zipper, zip_merge_file):
-        o = zip_merge_file
-        zipper.write(filename=o.source_path, arcname=o.name, compress_type=None)
+    def _zip_files(self, zipper, zip_merge_files):
+        files = [o for o in zip_merge_files if not os.path.isdir(o.source_path)]
+        for o in files:
+            zipper.write(filename=o.source_path, arcname=o.name, compress_type=None)
         
-    def _zip_dir(self, zipper, zip_merge_file):
-        o = zip_merge_file
-        for root, _, files in os.walk(o.source_path):
-            for fname in files:
-                fpath = os.path.join(root, fname)
-                parent, _ = os.path.split(o.source_path)
-                rel_dir = root[len(parent):]
-                arcname = os.path.join(rel_dir, fname) 
-                zipper.write(filename=fpath, arcname=arcname, compress_type=None)
+    def _zip_dirs(self, zipper, zip_merge_files):
+        files = [o for o in zip_merge_files if os.path.isdir(o.source_path)]
+        for o in files:
+            for root, _, files in os.walk(o.source_path):
+                for fname in files:
+                    fpath = os.path.join(root, fname)
+                    parent, _ = os.path.split(o.source_path)
+                    rel_dir = root[len(parent):]
+                    arcname = os.path.join(rel_dir, fname)
+                    zipper.write(filename=fpath, arcname=arcname, compress_type=None)
         
 
         
