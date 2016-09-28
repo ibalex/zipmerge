@@ -85,20 +85,23 @@ class ZipMerge(object):
         
             
 
+class ZipMergeFileHasher(object):
+    @classmethod
+    def hash(cls, zip_merge_files):
+        dest_hash = {}
+        for f in zip_merge_files:
+            if f.dest_path not in dest_hash:
+                dest_hash[f.dest_path] = []
+            dest_hash[f.dest_path].append(f)
+        return dest_hash
+
+
 class IFileConsolidator(object):
     def __init__(self, dependency_manager):
         self.dependency_manager = dependency_manager
         
     def consolidate(self, zip_merge_file):
         raise NotImplementedError
-    
-    def _hash_by_dest_path(self, zip_merge_files):
-        dest_hash = {}
-        for f in zip_merge_files:
-            if f.dest_path not in dest_hash:
-                dest_hash[f.dest_path] = []
-            dest_hash[f.dest_path].append(f)
-        return dest_hash        
     
     
     
