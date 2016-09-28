@@ -110,7 +110,7 @@ class PDFConsolidator(IFileConsolidator):
         super(PDFConsolidator, self).__init__(dependency_manager)
     
     def consolidate(self, zip_merge_files, new_files):
-        hashed = self._hash_by_dest_path(zip_merge_files)
+        hashed = ZipMergeFileHasher.hash(zip_merge_files)
         for dest_path, files in hashed.items():
             self.dependency_manager.upsert_parent_directory(dest_path)
             merger = self.dependency_manager.get_pdf_file_merger(dest_path)
@@ -127,7 +127,7 @@ class ZipConsolidator(IFileConsolidator):
         super(ZipConsolidator, self).__init__(dependency_manager)
     
     def consolidate(self, zip_merge_files, new_files):
-        hashed = self._hash_by_dest_path(zip_merge_files)
+        hashed = ZipMergeFileHasher.hash(zip_merge_files)
         for dest_path, files in hashed.items():
             self.dependency_manager.upsert_parent_directory(dest_path)
             zipper = self.dependency_manager.get_zip_file(dest_path, "a")
