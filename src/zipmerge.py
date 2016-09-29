@@ -7,7 +7,7 @@ class DependencyManager(object):
         mocking in the unit test... by indirectly using dependencies 
         thru this class and injecting it to other classes, mocking 
         the dependencies becomes easy.  patching is another option,
-        but I think it would have made the unit test too ugly.'''
+        but I think it would have made the unit test ugly.'''
     
     def get_pdf_file_merger(self, fpath):
         if os.path.exists(fpath):
