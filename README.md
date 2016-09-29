@@ -4,11 +4,19 @@ A small wrapper to the libraries ZipFile & PyPDF2.  It provides an api allowing 
 
 Example:
 
-	zipfile = "\\users\\jschmow\\desktop\\foobar.zip"
-	files = [('\\users\\jschmow\\desktop\\hello.pdf', zipfile),
-			 ('\\users\\jschmow\\desktop\\world.png', zipfile),
-			 ('\\users\\jschmow\\desktop\\other_files', zipfile)]
-	zipmerge = ZipMerge()
-	results = zipmerge.run(files)
+	hello_world_pdf = '\\users\\jschmow\\desktop\\hello_world.pdf'
+	files = [('\\users\\jschmow\\desktop\\hello.pdf', hello_world_pdf),
+			 ('\\users\\jschmow\\desktop\\world.pdf', hello_world_pdf)]
 	
-	print(results)   #prints "\\users\\jschmow\\desktop\\foobar.zip"
+	zipmerge = ZipMerge()	
+	results = zipmerge.run(files)
+	print(results)   #prints '\\users\\jschmow\\desktop\\hello_world.pdf'
+
+	foobar_zip = '\\users\\jschmow\\desktop\\foobar.zip'
+	files = [(hello_world_pdf, foobar_zip),
+			 ('\\users\\jschmow\\desktop\\world.png', foobar_zip),
+			 ('\\users\\jschmow\\desktop\\other_files', foobar_zip)]	
+	
+	zipmerge = ZipMerge()	
+	results = zipmerge.run(files)
+	print(results)   #prints '\\users\\jschmow\\desktop\\foobar.zip'
