@@ -6,7 +6,7 @@ class DependencyManager(object):
     ''' This class is not really needed but made it convenient for 
         mocking in the unit test... by indirectly using dependencies 
         thru this class and injecting it to other classes, mocking 
-        the dependencies becomes easy.  We could have used patch 
+        the dependencies becomes easy.  patching is another option,
         but I think it would have made the unit test too ugly.'''
     
     def get_pdf_file_merger(self, fpath):
