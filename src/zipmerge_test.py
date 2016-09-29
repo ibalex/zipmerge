@@ -28,13 +28,15 @@ class TestZipMerge(unittest.TestCase):
                  ('\\fake\\file\\path2\\c.pdf', dest_path)]
         actual = self.zipmerge.run(files)
         expected = [dest_path]
-        self.assertEqual=(actual, expected)
+        self.assertEqual(actual, expected)
         
         # Verify the usage of the PdfFileMerger & PdfFileReader API's because 
-        # they are Mocks and we have no actual results to test
+        # they are Mocks and we have no actual result files to verify
         self.assertEquals(self.pdf_file_merger_mock.append.call_count, len(files))
         self.pdf_file_merger_mock.write.assert_called_once_with(dest_path)
 
+        # Also verify that we created the directory for the destination file if it didn't already exist
+        self.dependency_mgr_mock.upsert_parent_directory.assert_called_once_with(dest_path)
 
     def test_simple_zip_merge(self):
         src = '\\fake\\file\\path\\'
@@ -44,14 +46,15 @@ class TestZipMerge(unittest.TestCase):
         files = [(s1, dest_path), (s2, dest_path), (s3, dest_path)]
         actual = self.zipmerge.run(files)
         expected = [dest_path]
-        self.assertEqual=(actual, expected)
+        self.assertEqual(actual, expected)
 
-        # Reluctantly testing behavior again
+        # Testing behavior again
         self.assertEquals(self.zip_file_mock.write.call_count, len(files))
         calls = [call(arcname=fa, compress_type=None, filename=s1),
                  call(arcname=fb, compress_type=None, filename=s2),
                  call(arcname=fc, compress_type=None, filename=s3)]
         self.zip_file_mock.write.assert_has_calls(calls)
+        self.dependency_mgr_mock.upsert_parent_directory.assert_called_once_with(dest_path)
         
      
 #     def test_simple_pdf_merge_and_zip_merge(self):
